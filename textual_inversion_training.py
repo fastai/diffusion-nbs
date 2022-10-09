@@ -13,8 +13,9 @@ from PIL import Image
 from PIL.Image import Resampling
 from torchvision import transforms
 from tqdm.auto import tqdm
-from transformers import CLIPFeatureExtractor, CLIPTextModel, CLIPTokenizer
 
+from transformers import CLIPFeatureExtractor, CLIPTextModel, CLIPTokenizer
+import fastcore.all as fc
 from huggingface_hub import notebook_login
 from pathlib import Path
 
@@ -64,30 +65,6 @@ templates = [
     "a photo of a small {}",
 ]
 
-style_templates = [
-    "a painting in the style of {}",
-    "a rendering in the style of {}",
-    "a cropped painting in the style of {}",
-    "the painting in the style of {}",
-    "a clean painting in the style of {}",
-    "a dirty painting in the style of {}",
-    "a dark painting in the style of {}",
-    "a picture in the style of {}",
-    "a cool painting in the style of {}",
-    "a close-up painting in the style of {}",
-    "a bright painting in the style of {}",
-    "a cropped painting in the style of {}",
-    "a good painting in the style of {}",
-    "a close-up painting in the style of {}",
-    "a rendition in the style of {}",
-    "a nice painting in the style of {}",
-    "a small painting in the style of {}",
-    "a weird painting in the style of {}",
-    "a large painting in the style of {}",
-]
-
-import fastcore.all as fc
-
 class TextualInversionDataset:
     def __init__(self, tokenizer, images, learnable_property="object", size=512,
                  repeats=100, interpolation=Resampling.BICUBIC, flip_p=0.5, set="train", placeholder_token="*"):
@@ -134,19 +111,16 @@ noise_scheduler = DDPMScheduler(
 
 def training_function(text_encoder, vae, unet, train_batch_size, gradient_accumulation_steps,
                       lr, max_train_steps, scale_lr, output_dir):
-    accelerator = Accelerator(gradient_accumulation_steps=gradient_accumulation_steps)
+    accelerator = Accelerator(gradient_accumulation_steps=gradient_accumulation_steps, mixed_precision='fp16')
     train_dataloader = create_dataloader(train_batch_size)
-    if scale_lr:
-        lr = (lr * gradient_accumulation_steps * train_batch_size * accelerator.num_processes)
+    if scale_lr: lr = (lr * gradient_accumulation_steps * train_batch_size * accelerator.num_processes)
     optimizer = torch.optim.AdamW(text_encoder.get_input_embeddings().parameters(), lr=lr)
     text_encoder, optimizer, train_dataloader = accelerator.prepare(text_encoder, optimizer, train_dataloader)
     vae.to(accelerator.device).eval()
     unet.to(accelerator.device).eval()
 
-    # We need to recalculate our total training steps as the size of the training dataloader may have changed.
     num_update_steps_per_epoch = math.ceil(len(train_dataloader) / gradient_accumulation_steps)
     num_train_epochs = math.ceil(max_train_steps / num_update_steps_per_epoch)
-
     total_batch_size = train_batch_size * accelerator.num_processes * gradient_accumulation_steps
     progress_bar = tqdm(range(max_train_steps), disable=not accelerator.is_local_main_process)
     progress_bar.set_description("Steps")
@@ -168,8 +142,7 @@ def training_function(text_encoder, vae, unet, train_batch_size, gradient_accumu
                 accelerator.backward(loss)
 
                 # We only want to optimize the concept embeddings
-                if accelerator.num_processes > 1: grads = text_encoder.module.get_input_embeddings().weight.grad
-                else: grads = text_encoder.get_input_embeddings().weight.grad
+                grads = text_encoder.get_input_embeddings().weight.grad
                 index_grads_to_zero = torch.arange(len(tokenizer)) != placeholder_token_id
                 grads.data[index_grads_to_zero, :] = grads.data[index_grads_to_zero, :].fill_(0)
                 optimizer.step()
@@ -182,21 +155,17 @@ def training_function(text_encoder, vae, unet, train_batch_size, gradient_accumu
             progress_bar.set_postfix(loss=loss.detach().item())
             if global_step >= max_train_steps: break
 
-        accelerator.wait_for_everyone()
-
-    # Create the pipeline using using the trained modules and save it.
-    if accelerator.is_main_process:
-        pipeline = StableDiffusionPipeline(
-            text_encoder=accelerator.unwrap_model(text_encoder),
-            vae=vae, unet=unet, tokenizer=tokenizer,
-            scheduler=PNDMScheduler(
-                beta_start=0.00085, beta_end=0.012, beta_schedule="scaled_linear", skip_prk_steps=True),
-            safety_checker=StableDiffusionSafetyChecker.from_pretrained("CompVis/stable-diffusion-safety-checker"),
-            feature_extractor=CLIPFeatureExtractor.from_pretrained("openai/clip-vit-base-patch32"))
-        pipeline.save_pretrained(output_dir)
-        learned_embeds = accelerator.unwrap_model(text_encoder).get_input_embeddings().weight[placeholder_token_id]
-        learned_embeds_dict = {placeholder_token: learned_embeds.detach().cpu()}
-        torch.save(learned_embeds_dict, os.path.join(output_dir, "learned_embeds.bin"))
+    pipeline = StableDiffusionPipeline(
+        text_encoder=accelerator.unwrap_model(text_encoder),
+        vae=vae, unet=unet, tokenizer=tokenizer,
+        scheduler=PNDMScheduler(
+            beta_start=0.00085, beta_end=0.012, beta_schedule="scaled_linear", skip_prk_steps=True),
+        safety_checker=StableDiffusionSafetyChecker.from_pretrained("CompVis/stable-diffusion-safety-checker"),
+        feature_extractor=CLIPFeatureExtractor.from_pretrained("openai/clip-vit-base-patch32"))
+    pipeline.save_pretrained(output_dir)
+    learned_embeds = accelerator.unwrap_model(text_encoder).get_input_embeddings().weight[placeholder_token_id]
+    learned_embeds_dict = {placeholder_token: learned_embeds.detach().cpu()}
+    torch.save(learned_embeds_dict, os.path.join(output_dir, "learned_embeds.bin"))
 
 torch.manual_seed(42)
 training_function(text_encoder, vae, unet, train_batch_size=1, gradient_accumulation_steps=4, lr=5e-04,
