@@ -13,9 +13,9 @@ There are a number of other online tools (midjourney, Wombo, NighCafe), typicall
 
 ## Fancier Interfaces
 
-People in the community have rushed to create new interfaces with additional advanced options for generation. [The stable-diffusion-webui](https://github.com/AUTOMATIC1111/stable-diffusion-webui) by AUTOMATIC1111 is probably the most fully-featured and popular at the moment.
+People in the community have rushed to create new interfaces with additional advanced options for generation. For example, [this stable diffusion webui](https://github.com/sd-webui/stable-diffusion-webui) by hlky has a choice of several slick interfaces.
 It has tabs for multiple tasks, batch functionality, integration of things like textual inversion, support for managing a number of model versions and much more. Settings are saved in the metadata of the resulting images, making it easy to access or share your favourite presets. 
-This is great for running SD locally, but there is also a [colab notebook](https://colab.research.google.com/drive/1kw3egmSn-KgWsikYvOMjJkVDsPLjEMzl) if you'd prefer to use Google's GPUs. 
+This is great for running SD locally, but there is also a [colab notebook](https://colab.research.google.com/github/altryne/sd-webui-colab/blob/main/Stable_Diffusion_WebUi_Altryne.ipynb) if you'd prefer to use Google's GPUs. 
 
 The other notable mention in terms of local interfaces is Softology's ['Visions of Chaos'](https://softology.pro/voc.htm) tool, which makes it fairly easy to run a stagering number different notebooks/pipelines locally on Windows.
 
