@@ -1,0 +1,4 @@
+fastai
+diffusers
+transformers
+huggingface-hub
