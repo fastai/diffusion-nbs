@@ -1,0 +1,32 @@
+{
+    "name": "diffusion-confusion",
+    "build": {
+        "dockerfile": "../Dockerfile",
+        "context": ".."
+    },
+    "containerUser": "1000",
+    "settings": {
+        "python.pythonPath": "/usr/local/bin/python",
+        "[python]": {
+            "editor.formatOnSave": true,
+            "editor.codeActionsOnSave": {
+                "source.organizeImports": true
+            }
+        }
+    },
+    "extensions": [
+        "ms-python.python"
+    ],
+    "mounts": [
+        "source=cache,target=/home/kevin/.cache,type=volume"
+    ],
+    "workspaceFolder": "/code",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/code,type=bind,consistency=cached",
+    "runArgs": [
+        "--ipc=host",
+        "--env-file=.devcontainer/.env",
+        "--gpus",
+        "all"
+    ],
+    "postCreateCommand": "jupyter notebook",
+}
