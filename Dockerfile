@@ -7,9 +7,7 @@ RUN apt-key adv --fetch-keys https://developer.download.nvidia.cn/compute/cuda/r
 
 ENV PIP_EXTRA_INDEX_URL=https://download.pytorch.org/whl/cu116
 ENV LANG=C.UTF-8 \
-  LC_ALL=C.UTF-8 \
-  PATH="${PATH}:/root/.poetry/bin"
-
+  LC_ALL=C.UTF-8 
 RUN apt update -y && apt install -y sudo
 RUN groupadd --gid $USER_GID $USERNAME &&\
  useradd --uid $USER_UID --gid $USER_GID -m $USERNAME &&\  
@@ -43,13 +41,6 @@ USER ${USERNAME}
 
 CMD mkdir -p /code
 WORKDIR /code
-RUN mkdir sparrow_patterns && \
-  touch sparrow_patterns/__init__.py
-# COPY setup.cfg .
-# COPY setup.py .
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 ADD . .
-
-
-ENTRYPOINT [ "make" ]
