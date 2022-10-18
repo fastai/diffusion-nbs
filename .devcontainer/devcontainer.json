@@ -18,7 +18,7 @@
         "ms-python.python"
     ],
     "mounts": [
-        "source=cache,target=/home/kevin/.cache,type=volume"
+        "source=cache,target=/home/dev/.cache,type=volume"
     ],
     "workspaceFolder": "/code",
     "workspaceMount": "source=${localWorkspaceFolder},target=/code,type=bind,consistency=cached",

@@ -1,6 +1,6 @@
 FROM nvidia/cuda:11.3.1-cudnn8-runtime-ubuntu20.04
 
-ARG USERNAME=kevin
+ARG USERNAME=dev
 ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 RUN apt-key adv --fetch-keys https://developer.download.nvidia.cn/compute/cuda/repos/ubuntu2004/x86_64/3bf863cc.pub
