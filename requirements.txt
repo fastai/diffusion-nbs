@@ -2,3 +2,4 @@ fastai
 diffusers
 transformers
 huggingface-hub
+jupyter

@@ -1,8 +1,0 @@
-diffusers
-transformers
-fastcore
-jupyter
-torch 
-torchvision 
-torchaudio
-matplotlib
