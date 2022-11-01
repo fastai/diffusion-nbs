@@ -43,4 +43,8 @@ CMD mkdir -p /code
 WORKDIR /code
 COPY requirements.txt .
 RUN pip install -r requirements.txt
+RUN git config --global credential.helper store
+RUN /home/dev/.local/bin/jupyter contrib nbextension install --user
+RUN sudo apt install jq -y
+RUN /home/dev/.local/bin/jupyter nbextension enable gist_it/main
 ADD . .

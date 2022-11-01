@@ -28,5 +28,5 @@
         "--gpus",
         "all"
     ],
-    "postCreateCommand": "jupyter notebook",
+    "postCreateCommand": "jq --arg GITHUB_PAT $GITHUB_PAT '.gist_it_personal_access_token = $GITHUB_PAT' ~/.jupyter/nbconfig/notebook.json > ~/.jupyter/nbconfig/notebook1.json && cp ~/.jupyter/nbconfig/notebook1.json ~/.jupyter/nbconfig/notebook.json && jupyter notebook --no-browser --NotebookApp.token='' --NotebookApp.password=''"
 }
