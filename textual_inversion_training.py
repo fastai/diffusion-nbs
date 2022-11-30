@@ -10,7 +10,6 @@ from diffusers.hub_utils import init_git_repo, push_to_hub
 from diffusers.optimization import get_scheduler
 from diffusers.pipelines.stable_diffusion import StableDiffusionSafetyChecker
 from PIL import Image
-from PIL.Image import Resampling
 from torchvision import transforms
 from tqdm.auto import tqdm
 
@@ -29,7 +28,7 @@ model_nm = "CompVis/stable-diffusion-v1-4"
 
 path = Path.home()/'Downloads/photos/'
 paths = list(path.iterdir())
-images = [Image.open(p).resize((512, 512), resample=Resampling.BICUBIC).convert("RGB") for p in paths]
+images = [Image.open(p).resize((512, 512), resample=Image.BICUBIC).convert("RGB") for p in paths]
 
 what_to_teach = "object"
 placeholder_token = "<tiny>"
@@ -67,7 +66,7 @@ templates = [
 
 class TextualInversionDataset:
     def __init__(self, tokenizer, images, learnable_property="object", size=512,
-                 repeats=100, interpolation=Resampling.BICUBIC, flip_p=0.5, set="train", placeholder_token="*"):
+                 repeats=100, interpolation=Image.BICUBIC, flip_p=0.5, set="train", placeholder_token="*"):
         fc.store_attr()
         self.num_images = len(images)
         if set == "train": self._length = self.num_images * repeats
