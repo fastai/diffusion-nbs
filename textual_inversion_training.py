@@ -23,7 +23,7 @@ import torchvision.transforms.functional as tf
 import accelerate
 
 torch.manual_seed(1)
-if not (Path.home()/'.huggingface'/'token').exists(): notebook_login()
+if not (Path.home()/'.cache/huggingface'/'token').exists(): notebook_login()
 
 model_nm = "CompVis/stable-diffusion-v1-4"
 
