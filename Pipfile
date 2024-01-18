@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+fastai = "*"
+diffusers = "*"
+transformers = "*"
+huggingface-hub = "*"
+jupyterlab = "*"
+ipywidgets = "*"
+accelerate = "*"
+safetensors = "*"
+scipy = "*"
+tqdm = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.10"
