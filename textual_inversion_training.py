@@ -65,6 +65,28 @@ templates = [
     "a photo of a small {}",
 ]
 
+style_templates = [
+    "a painting in the style of {}",
+    "a rendering in the style of {}",
+    "a cropped painting in the style of {}",
+    "the painting in the style of {}",
+    "a clean painting in the style of {}",
+    "a dirty painting in the style of {}",
+    "a dark painting in the style of {}",
+    "a picture in the style of {}",
+    "a cool painting in the style of {}",
+    "a close-up painting in the style of {}",
+    "a bright painting in the style of {}",
+    "a cropped painting in the style of {}",
+    "a good painting in the style of {}",
+    "a close-up painting in the style of {}",
+    "a rendition in the style of {}",
+    "a nice painting in the style of {}",
+    "a small painting in the style of {}",
+    "a weird painting in the style of {}",
+    "a large painting in the style of {}",
+]
+
 class TextualInversionDataset:
     def __init__(self, tokenizer, images, learnable_property="object", size=512,
                  repeats=100, interpolation=Resampling.BICUBIC, flip_p=0.5, set="train", placeholder_token="*"):
